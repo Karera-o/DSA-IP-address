@@ -5,11 +5,10 @@
 #include "IPAddressAnalyze.h"
 
 #define MAX_IPS 10000
-
 #define MAX_IP_LENGTH 16
 
-int IPAddressAnalyzer::readNextItemFromFile(FILE* inputFileStream){
-    if (!inputFileStream){
+int IPAddressAnalyzer::readNextItemFromFile(FILE* inputFileStream) {
+    if (!inputFileStream) {
         std::string message("Cannot open input file for reading");
         throw std::invalid_argument(message.c_str());
     }
@@ -24,11 +23,9 @@ struct IPData {
 
 unsigned int totalIPs = 0;
 
-
 void manualStrcpy(char* dest, const char* src) {
     while ((*dest++ = *src++));
 }
-
 
 int manualStrcmp(const char* str1, const char* str2) {
     while (*str1 && (*str1 == *str2)) {
@@ -40,7 +37,6 @@ int manualStrcmp(const char* str1, const char* str2) {
 
 void addOrUpdateIP(const char* ip, unsigned int count) {
     for (unsigned int i = 0; i < totalIPs; ++i) {
-        
         bool isSameIP = true;
         for (int j = 0; ip[j] != '\0' || ipData[i].ip[j] != '\0'; ++j) {
             if (ip[j] != ipData[i].ip[j]) {
@@ -61,21 +57,18 @@ void addOrUpdateIP(const char* ip, unsigned int count) {
 }
 
 void sortIPData() {
-
     for (unsigned int i = 1; i < totalIPs; i++) {
         IPData key = ipData[i];
         int j = i - 1;
 
-
-        while (j >= 0 && (ipData[j].count < key.count || 
-                         (ipData[j].count == key.count && manualStrcmp(ipData[j].ip, key.ip) < 0))) {
+        while (j >= 0 && (ipData[j].count < key.count ||
+                          (ipData[j].count == key.count && manualStrcmp(ipData[j].ip, key.ip) > 0))) {
             ipData[j + 1] = ipData[j];
             j--;
         }
         ipData[j + 1] = key;
     }
 }
-
 
 void IPAddressAnalyzer::getMostFrequentIPAddress(char* inputFilePath, char* outputFilePath, int n) {
     FILE* inFileStream = fopen(inputFilePath, "r");
@@ -99,29 +92,23 @@ void IPAddressAnalyzer::getMostFrequentIPAddress(char* inputFilePath, char* outp
         addOrUpdateIP(ip, count);
     }
 
-    fclose(inFileStream); 
+    fclose(inFileStream);
 
     sortIPData();
 
-    int outputCount = 0;
-    int currentRank = 1;
-    unsigned int lastCount = UINT_MAX;
-    int rankForNextValidIP = 1;
+    unsigned int currentRank = 0;
+    unsigned int previousCount = 0;
+    unsigned int uniqueCountsPrinted = 0;
 
-    for (unsigned int i = 0; i < totalIPs && outputCount < n; ++i) {
-        if (lastCount != ipData[i].count) {
-            currentRank = rankForNextValidIP;
-            lastCount = ipData[i].count;
+    for (unsigned int i = 0; i < totalIPs && uniqueCountsPrinted < n; ++i) {
+        if (ipData[i].count != previousCount) {
+            currentRank++;
+            previousCount = ipData[i].count;
+            if (currentRank > n)
+                break;
         }
-        
         fprintf(outFileStream, "%d, %s, %u\n", currentRank, ipData[i].ip, ipData[i].count);
-        outputCount++;
-        rankForNextValidIP++;
-
-        if (i + 1 < totalIPs && ipData[i + 1].count == lastCount && outputCount == n) {
-            n++; 
-        }
     }
 
-    fclose(outFileStream); 
+    fclose(outFileStream);
 }
