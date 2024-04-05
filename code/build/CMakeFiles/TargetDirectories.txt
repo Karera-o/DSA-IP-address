@@ -1,0 +1,3 @@
+/home/karera/dsa/DSA-IP-address/code/build/CMakeFiles/homework.dir
+/home/karera/dsa/DSA-IP-address/code/build/CMakeFiles/edit_cache.dir
+/home/karera/dsa/DSA-IP-address/code/build/CMakeFiles/rebuild_cache.dir
